@@ -4,15 +4,20 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.data.Feature;
 import com.google.maps.android.data.geojson.GeoJsonFeature;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
 import com.google.maps.android.data.geojson.GeoJsonPointStyle;
+import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
+import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -48,9 +53,9 @@ public class GeoJsonDemoActivity extends BaseDemoActivity {
     @Override
     protected void startDemo() {
         // Download the GeoJSON file.
-        retrieveFileFromUrl();
+        //retrieveFileFromUrl();
         // Alternate approach of loading a local GeoJSON file.
-        //retrieveFileFromResource();
+        retrieveFileFromResource();
     }
 
     private void retrieveFileFromUrl() {
@@ -59,7 +64,15 @@ public class GeoJsonDemoActivity extends BaseDemoActivity {
 
     private void retrieveFileFromResource() {
         try {
-            GeoJsonLayer layer = new GeoJsonLayer(getMap(), R.raw.earthquakes_with_usa, this);
+            GeoJsonLayer layer = new GeoJsonLayer(getMap(), R.raw.earthquakes_with_usa, this, true);
+            final GeoJsonPolygonStyle style = new GeoJsonPolygonStyle();
+            style.setFillColor(ColorUtils.setAlphaComponent(Color.WHITE, 110));
+            style.setStrokeColor(Color.BLUE);
+            style.setStrokeWidth(3.5f);
+            for (GeoJsonFeature feature : layer.getFeatures()) {
+                feature.setPolygonStyle(style);
+            }
+
             addGeoJsonLayerToMap(layer);
         } catch (IOException e) {
             Log.e(mLogTag, "GeoJSON file could not be read");
@@ -118,7 +131,7 @@ public class GeoJsonDemoActivity extends BaseDemoActivity {
                 reader.close();
                 stream.close();
 
-                return new GeoJsonLayer(getMap(), new JSONObject(result.toString()));
+                return new GeoJsonLayer(getMap(), new JSONObject(result.toString()), false);
             } catch (IOException e) {
                 Log.e(mLogTag, "GeoJSON file could not be read");
             } catch (JSONException e) {
@@ -136,8 +149,10 @@ public class GeoJsonDemoActivity extends BaseDemoActivity {
 
     }
 
-    private void addGeoJsonLayerToMap(GeoJsonLayer layer) {
-
+    private void addGeoJsonLayerToMap(@Nullable final GeoJsonLayer layer) {
+        if (layer == null) {
+            return;
+        }
         addColorsToMarkers(layer);
         layer.addLayerToMap();
         getMap().moveCamera(CameraUpdateFactory.newLatLng(new LatLng(31.4118,-103.5355)));
@@ -153,6 +168,5 @@ public class GeoJsonDemoActivity extends BaseDemoActivity {
         });
 
     }
-
 }
 
