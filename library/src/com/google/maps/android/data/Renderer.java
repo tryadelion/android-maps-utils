@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v4.util.LruCache;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -525,8 +524,9 @@ public class Renderer {
                         worldPolygonOptions.strokeWidth(polygonOptions.getStrokeWidth());
                         worldPolygonOptions.strokeColor(polygonOptions.getStrokeColor());
                     }
-                    addPolygonOptionsToMap(worldPolygonOptions);
-                    return result;
+                    final List<Object> geometries = addPolygonOptionsToMap(worldPolygonOptions);
+                    geometries.add(result);
+                    return geometries;
                 }
                 return addPolygonToMap(polygonOptions, (DataPolygon) geometry, null);
             case "MultiPoint":
@@ -545,8 +545,9 @@ public class Renderer {
                     worldPolygonOptions.strokeWidth(geoJsonPolygonStyle.getStrokeWidth());
                     worldPolygonOptions.strokeColor(geoJsonPolygonStyle.getStrokeColor());
 
-                    addPolygonOptionsToMap(worldPolygonOptions);
-                    return result;
+                    final List<Object> geometries = addPolygonOptionsToMap(worldPolygonOptions);
+                    geometries.add(result);
+                    return geometries;
                 }
                 return addMultiPolygonToMap(((GeoJsonFeature) feature).getPolygonStyle(),
                         ((GeoJsonMultiPolygon) geometry), null);
@@ -557,9 +558,12 @@ public class Renderer {
         return null;
     }
 
-    private void addPolygonOptionsToMap(PolygonOptions polygonOptions) {
-        final Polygon addedPolygon = mMap.addPolygon(polygonOptions);
-        addedPolygon.setClickable(polygonOptions.isClickable());
+    private ArrayList<Object> addPolygonOptionsToMap(PolygonOptions polygonOptions) {
+        final ArrayList<Object> geometries = new ArrayList<>();
+        final Polygon addPolygon = mMap.addPolygon(polygonOptions);
+        addPolygon.setClickable(polygonOptions.isClickable());
+        geometries.add(addPolygon);
+        return geometries;
     }
 
     /**
