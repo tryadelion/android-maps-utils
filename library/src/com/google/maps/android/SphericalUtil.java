@@ -20,16 +20,30 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-import static java.lang.Math.*;
-import static com.google.maps.android.MathUtil.*;
+import static com.google.maps.android.MathUtil.EARTH_RADIUS;
+import static com.google.maps.android.MathUtil.arcHav;
+import static com.google.maps.android.MathUtil.havDistance;
+import static com.google.maps.android.MathUtil.wrap;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.tan;
+import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
 
 public class SphericalUtil {
 
-    private SphericalUtil() {}
+    private SphericalUtil() {
+    }
 
     /**
      * Returns the heading from one LatLng to another LatLng. Headings are
      * expressed in degrees clockwise from North within the range [-180,180).
+     *
      * @return The heading in degrees clockwise from north.
      */
     public static double computeHeading(LatLng from, LatLng to) {
@@ -48,6 +62,7 @@ public class SphericalUtil {
     /**
      * Returns the LatLng resulting from moving a distance from an origin
      * in the specified heading (expressed in degrees clockwise from north).
+     *
      * @param from     The LatLng from which to start.
      * @param distance The distance to travel.
      * @param heading  The heading in degrees clockwise from north.
@@ -74,6 +89,7 @@ public class SphericalUtil {
      * meters travelled and original heading. Headings are expressed in degrees
      * clockwise from North. This function returns null when no solution is
      * available.
+     *
      * @param to       The destination LatLng.
      * @param distance The distance travelled, in meters.
      * @param heading  The heading in degrees clockwise from north.
@@ -116,6 +132,7 @@ public class SphericalUtil {
     /**
      * Returns the LatLng which lies the given fraction of the way between the
      * origin LatLng and the destination LatLng.
+     *
      * @param from     The LatLng from which to start.
      * @param to       The LatLng toward which to travel.
      * @param fraction A fraction of the distance to travel.
@@ -158,14 +175,14 @@ public class SphericalUtil {
     private static double distanceRadians(double lat1, double lng1, double lat2, double lng2) {
         return arcHav(havDistance(lat1, lat2, lng1 - lng2));
     }
-    
+
     /**
      * Returns the angle between two LatLngs, in radians. This is the same as the distance
      * on the unit sphere.
      */
     static double computeAngleBetween(LatLng from, LatLng to) {
         return distanceRadians(toRadians(from.latitude), toRadians(from.longitude),
-                               toRadians(to.latitude), toRadians(to.longitude));
+                toRadians(to.latitude), toRadians(to.longitude));
     }
 
     /**
@@ -198,6 +215,7 @@ public class SphericalUtil {
 
     /**
      * Returns the area of a closed path on Earth.
+     *
      * @param path A closed path.
      * @return The path's area in square meters.
      */
@@ -209,6 +227,7 @@ public class SphericalUtil {
      * Returns the signed area of a closed path on Earth. The sign of the area may be used to
      * determine the orientation of the path.
      * "inside" is the surface that does not contain the South Pole.
+     *
      * @param path A closed path.
      * @return The loop's area in square meters.
      */
@@ -223,7 +242,9 @@ public class SphericalUtil {
      */
     static double computeSignedArea(List<LatLng> path, double radius) {
         int size = path.size();
-        if (size < 3) { return 0; }
+        if (size < 3) {
+            return 0;
+        }
         double total = 0;
         LatLng prev = path.get(size - 1);
         double prevTanLat = tan((PI / 2 - toRadians(prev.latitude)) / 2);
